@@ -16,4 +16,5 @@ function refreshCount() {
 	}
 	xhr.send();
 }
- var intervalID = window.setInterval(refreshCount, 5000);
+refreshCount();
+var intervalID = window.setInterval(refreshCount, 60000);
