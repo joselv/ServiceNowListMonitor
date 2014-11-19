@@ -1,0 +1,22 @@
+{
+  "name": "HI Checker",
+  "version": "1.0",
+  "manifest_version": 2,
+  "description": "Checks HI for updates to new incidents assigned to me",
+  "permissions": [
+    "storage",
+    "alarms",
+    "https://hi.service-now.com/"
+  ],
+  "browser_action": {
+    "default_icon": "bug-todo.png",
+    "default_title": "Recently update incidents",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "scripts": [
+      "background.js"
+    ],
+    "persistent": true
+  }
+}
