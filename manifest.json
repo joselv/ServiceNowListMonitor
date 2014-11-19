@@ -10,7 +10,7 @@
   ],
   "browser_action": {
     "default_icon": "bug-todo.png",
-    "default_title": "Recently update incidents",
+    "default_title": "Working list",
     "default_popup": "popup.html"
   },
   "background": {
