@@ -3,6 +3,7 @@
   "version": "1.0",
   "manifest_version": 2,
   "description": "Checks HI for updates to new incidents assigned to me",
+  "options_page": "options.html",
   "permissions": [
     "storage",
     "alarms",
