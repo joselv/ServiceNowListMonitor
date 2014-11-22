@@ -33,7 +33,9 @@ function refreshCount() {
                         short_description: resp.records[i].short_description
                     });
                 };
-
+                chrome.storage.sync.set({
+                    'values': newIncidentList
+                });
                 var newlyAdded = getNewIncidents(currentIncidentList, newIncidentList);
                 var newlyUpdated = getRecenlyUpdated(currentIncidentList, newIncidentList);
                 if (newlyAdded.length > 0) {
@@ -62,9 +64,7 @@ function refreshCount() {
                 }
 
 
-                chrome.storage.sync.set({
-                    'values': newIncidentList
-                });
+
             }
         }
 
@@ -79,7 +79,7 @@ function getRecenlyUpdated(currentList, newList) {
     var currentNumbers = _.pluck(currentList, 'number');
     _.each(currentList, function(incident) {
         var matchingIncident = _.find(newList, function(inc) {
-            return inc.number > incident.number;
+            return inc.number === incident.number;
         });
         if (matchingIncident && matchingIncident.updated > incident.updated) {
             updatedIncidents.push(matchingIncident);
