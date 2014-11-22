@@ -1,17 +1,50 @@
 <!DOCTYPE html>
 <html>
-  <head>
+
+<head>
     <title>
-      Hi Checker Options
+        Hi Checker Options
     </title>
-  </head>
-  <body>
-    Encoded Query:
-    <input type="text" id="encodedQuery" value="incident.do?JSONv2&sysparm_action=getRecords&sysparm_query=active=true^assigned_to=javascript:getMyAssignments()^u_action_needed=true">
-    Refresh Rate (seconds):
-    <input type="text" id="refreshRate" value="30">
-    <div id="status"></div>
-    <button id="save">Save</button>
-    <script src="options.js"></script>
-  </body>
+    <link rel="stylesheet" href="pure-min.css">
+    <style>
+    .container {
+        margin-left: 20px;
+    }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <form class="pure-form pure-form-stacked">
+            <fieldset>
+                <legend>HI list checker options</legend>
+                <div class="pure-control-group">
+                    <label for="encodedQuery">
+                        Encoded Query:
+                    </label>
+                    <input class="pure-input-2-3" type="text" id="encodedQuery" value="">
+                </div>
+                <div class="pure-control-group">
+                    <label for="refreshRate">
+                        Refresh Rate (seconds):
+                    </label>
+                    <input type="text" id="refreshRate" value="30">
+                </div>
+                <div class="pure-control-group">
+                    <label for="enableNotifications">
+                        Notifications Enabled
+                    </label>
+                    <input type="checkbox" id="refreshRate">
+                </div>
+                <div id="status"></div>
+                <div class="pure-control-group">
+                    <button id="save" type="submit" class="pure-button pure-button-primary">Save</button>
+                </div>
+            </fieldset>
+
+        </form>
+        <div>
+            <script src="options.js"></script>
+</body>
+
 </html>

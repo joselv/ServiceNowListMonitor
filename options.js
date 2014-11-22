@@ -21,7 +21,7 @@ function restore_options() {
     // Use default value color = 'red' and likesColor = true.
     chrome.storage.sync.get({
         query: 'incident.do?JSONv2&sysparm_action=getRecords&sysparm_query=active=true^assigned_to=javascript:getMyAssignments()^u_action_needed=true',
-        rate: 60
+        rate: 10
     }, function(items) {
         console.log('in call back of restore_options');
         console.log(items);
