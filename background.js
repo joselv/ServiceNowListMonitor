@@ -34,15 +34,9 @@ function refreshCount() {
                     });
                 };
 
-                newIncidentList.push({
-                    number: 'INT126551',
-                    updated: new Date().toString(),
-                    created: new Date().toString(),
-                    short_description: 'Help! I cant do what i really need to do!'
-                });
-                var newlyAdded = getNewIncidents(currentIncidentList, newIncidentList)
-
-                if (newlyAdded.length>0) {
+                var newlyAdded = getNewIncidents(currentIncidentList, newIncidentList);
+                var newlyUpdated = getRecenlyUpdated(currentIncidentList, newIncidentList);
+                if (newlyAdded.length > 0) {
                     chrome.notifications.create('newIncident', {
                         iconUrl: "icon.png",
                         type: 'list',
@@ -54,6 +48,20 @@ function refreshCount() {
                         console.log("Last error:", chrome.runtime.lastError)
                     })
                 }
+                if (newlyUpdated.length > 0) {
+                    chrome.notifications.create('UpdatedIncident', {
+                        iconUrl: "icon.png",
+                        type: 'list',
+                        title: 'Updated Incidents',
+                        message: 'Incidents in list recently Updated',
+                        priority: 1,
+                        items: newlyUpdated
+                    }, function(notificationId) {
+                        console.log("Last error:", chrome.runtime.lastError)
+                    })
+                }
+
+
                 chrome.storage.sync.set({
                     'values': newIncidentList
                 });
@@ -65,6 +73,26 @@ function refreshCount() {
 }
 
 
+function getRecenlyUpdated(currentList, newList) {
+    var updatedIncidents = [];
+    //get the incident numbers we know about
+    var currentNumbers = _.pluck(currentList, 'number');
+    _.each(currentList, function(incident) {
+        var matchingIncident = _.find(newList, function(inc) {
+            return inc.number > incident.number;
+        });
+        if (matchingIncident && matchingIncident.updated > incident.updated) {
+            updatedIncidents.push(matchingIncident);
+        }
+    });
+    return _.map(updatedIncidents, function(incident) {
+        return {
+            title: incident.number,
+            message: incident.short_description
+        };
+    });
+
+}
 
 function getNewIncidents(currentList, newList) {
     //get the incident numbers we already new about
