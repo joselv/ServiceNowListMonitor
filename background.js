@@ -77,21 +77,25 @@ function getRecenlyUpdated(currentList, newList) {
     var updatedIncidents = [];
     //get the incident numbers we know about
     var currentNumbers = _.pluck(currentList, 'number');
+    //loop through each incident in the current list
     _.each(currentList, function(incident) {
+        //find the matching incident in the new list
         var matchingIncident = _.find(newList, function(inc) {
             return inc.number === incident.number;
         });
+        //if we found a matching incident and its updated date is greater than last we new
         if (matchingIncident && matchingIncident.updated > incident.updated) {
+            //add it to the list of incidents to notify about
             updatedIncidents.push(matchingIncident);
         }
     });
+    //transform our updated incident list to pass it to the notifications
     return _.map(updatedIncidents, function(incident) {
         return {
             title: incident.number,
             message: incident.short_description
         };
     });
-
 }
 
 function getNewIncidents(currentList, newList) {
