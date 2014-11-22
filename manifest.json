@@ -16,7 +16,8 @@
   },
   "background": {
     "scripts": [
-      "background.js"
+      "background.js",
+      "underscore.js"
     ],
     "persistent": true
   }
