@@ -1,19 +1,19 @@
 {
-    "name": "HI Checker",
+    "name": "HI list Checker",
     "version": "1.0",
     "manifest_version": 2,
-    "description": "Checks HI for updates to new incidents assigned to me",
+    "description": "Monitors list of incidents on HI",
     "options_page": "options.html",
     "permissions": [
         "storage",
         "alarms",
         "https://hi.service-now.com/",
-        "notifications"
+        "notifications",
+        "tabs"
     ],
     "browser_action": {
         "default_icon": "bug-todo.png",
-        "default_title": "Working list",
-        "default_popup": "popup.html"
+        "default_title": "Working list"
     },
     "background": {
         "scripts": [

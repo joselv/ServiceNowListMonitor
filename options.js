@@ -21,7 +21,7 @@ function restore_options() {
     console.log('starting loading options');
     // Use default value color = 'red' and likesColor = true.
     chrome.storage.sync.get({
-        query: 'incident.do?JSONv2&sysparm_action=getRecords&sysparm_query=active=true^assigned_to=javascript:getMyAssignments()^u_action_needed=true',
+        query: 'active=true^assigned_to=javascript:getMyAssignments()^u_action_needed=true',
         rate: 10,
         nofications:true
     }, function(items) {
