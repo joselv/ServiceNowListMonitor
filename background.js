@@ -1,11 +1,14 @@
+//rate (in seconds) that the extension will check HI for changes to the list
 var rateOfRefresh = 10;
+//list of incidents that we already know about
 var currentIncidentList = [];
+//flag to use to skip a call to refreshCount() when the previous one hasn't completed
 var readyForNewREquest = true;
-//change the badge color to green (perhaps we should make it a different color based on something...what?)
-chrome.browserAction.setBadgeBackgroundColor({
-    color: '#14CC8C'
-});
 
+//change the badge color to green (perhaps we should make it a different color based on something...what?)
+chrome.browserAction.setBadgeBackgroundColor({color: '#14CC8C'});
+
+//if the extension icon is clicked, open up the list
 chrome.browserAction.onClicked.addListener(function() {
     chrome.storage.sync.get({
         query: 'active=true^assigned_to=javascript:getMyAssignments()^stateIN-40,2^ORu_action_needed=true^u_action_needed=true^ORstate=-40'
@@ -17,8 +20,10 @@ chrome.browserAction.onClicked.addListener(function() {
 });
 
 function refreshCount() {
+    //only refresh if not currently waiting for refresh to complete
     if (readyForNewREquest) {
-        readyForNewREquest=false;
+        //starting new refresh
+        readyForNewREquest = false;
         var newIncidentList = [];
         //get properties from storage
         chrome.storage.sync.get({
@@ -27,13 +32,13 @@ function refreshCount() {
             values: [],
             nofications: false
         }, function(items) {
-
             rateOfRefresh = items.rate;
             currentIncidentList = items.values;
-
+            //make the AJAX request to Hi to get the JSON list
             var xhr = new XMLHttpRequest();
             xhr.open("GET", "https://hi.service-now.com/incident.do?JSONv2&sysparm_action=getRecords&sysparm_query=" + items.query, true);
             xhr.onreadystatechange = function() {
+                //once the response is returned
                 if (xhr.readyState == 4) {
                     //parse the response
                     var resp = JSON.parse(xhr.responseText);
@@ -51,39 +56,23 @@ function refreshCount() {
                             short_description: resp.records[i].short_description
                         });
                     };
+                    //save new list to storage
                     chrome.storage.sync.set({
                         'values': newIncidentList
                     });
+                    //indicate that we are ready for new request
                     readyForNewREquest = true;
+
+                    //if notifications are enabled
                     if (items.nofications) {
+                        //get the list of newly added incidents
                         var newlyAdded = getNewIncidents(currentIncidentList, newIncidentList);
+                        //get the list of newly updated incidents
                         var newlyUpdated = getRecenlyUpdated(currentIncidentList, newIncidentList);
-                        if (newlyAdded.length > 0) {
-                            chrome.notifications.create('newIncident', {
-                                iconUrl: "icon.png",
-                                type: 'list',
-                                title: 'New Incidents',
-                                message: 'Incidents recently added to list',
-                                priority: 1,
-                                items: newlyAdded
-                            }, function(notificationId) {
-                                console.log("Last error:", chrome.runtime.lastError)
-                            })
-                        }
-                        if (newlyUpdated.length > 0) {
-                            chrome.notifications.create('UpdatedIncident', {
-                                iconUrl: "icon.png",
-                                type: 'list',
-                                title: 'Updated Incidents',
-                                message: 'Incidents in list recently Updated',
-                                priority: 1,
-                                items: newlyUpdated
-                            }, function(notificationId) {
-                                if (chrome.runtime.lastError) {
-                                    console.log("Last error:", chrome.runtime.lastError);
-                                }
-                            })
-                        }
+                        //if we have any newly added incidents, create a notification
+                        notify('newIncident', 'New Incidents', 'Incidents recently added to list', newlyAdded) 
+                        //if we have any newly updated incidents, create a notification
+                        notify('UpdatedIncident', 'Updated Incidents', 'Incidents in list recently Updated', newlyUpdated) 
                     }
                 }
             }
@@ -92,10 +81,29 @@ function refreshCount() {
     }
 }
 
+//create a notification to let the user know that someting occured
+function notify(notifyID, notifyTitle, notifyMessage, notifyList) {
+    //if we have any newly updated incidents, create a notification
+    if (notifyList.length > 0) {
+        chrome.notifications.create(notifyID, {
+            iconUrl: "1416810744_kwrite.png",
+            type: 'list',
+            title: notifyTitle,
+            message: notifyMessage,
+            priority: 1,
+            items: notifyList
+        }, function(notificationId) {
+            //if there are any errors creating the notification, then log them
+            if (chrome.runtime.lastError) {
+                console.log("Last error:", chrome.runtime.lastError);
+            }
+        })
+    }
+}
+
+//get a list of recently updated incidents in a form that can be passed to a notification
 function getRecenlyUpdated(currentList, newList) {
     var updatedIncidents = [];
-    //get the incident numbers we know about
-    var currentNumbers = _.pluck(currentList, 'number');
     //loop through each incident in the current list
     _.each(currentList, function(incident) {
         //find the matching incident in the new list
@@ -117,13 +125,10 @@ function getRecenlyUpdated(currentList, newList) {
     });
 }
 
+//get a list of recently added incidents in a form that can be passed to a notification
 function getNewIncidents(currentList, newList) {
-    //get the incident numbers we already new about
-    var currentNumbers = _.pluck(currentList, 'number');
-    //get the incident numbers that are in the list we just retrieved
-    var newNumbers = _.pluck(newList, 'number');
     //get a list of difference (numbers we didn't already know about)
-    var diffList = _.difference(newNumbers, currentNumbers);
+    var diffList = _.difference(_.pluck(newList, 'number'), _.pluck(currentList, 'number'));
     //filter newList to only those we didnt' know about
     var newIncidents = _.filter(newList, function(incident) {
         return _.contains(diffList, incident.number);

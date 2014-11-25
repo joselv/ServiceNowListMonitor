@@ -12,7 +12,7 @@
         "tabs"
     ],
     "browser_action": {
-        "default_icon": "bug-todo.png",
+        "default_icon": "1416810744_kwrite.png",
         "default_title": "Working list"
     },
     "background": {
