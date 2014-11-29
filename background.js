@@ -6,7 +6,9 @@ var currentIncidentList = [];
 var readyForNewREquest = true;
 
 //change the badge color to green (perhaps we should make it a different color based on something...what?)
-chrome.browserAction.setBadgeBackgroundColor({color: '#14CC8C'});
+chrome.browserAction.setBadgeBackgroundColor({
+    color: '#14CC8C'
+});
 
 //if the extension icon is clicked, open up the list
 chrome.browserAction.onClicked.addListener(function() {
@@ -79,9 +81,9 @@ function refreshCount() {
                         //get the list of newly updated incidents
                         var newlyUpdated = getRecenlyUpdated(currentIncidentList, newIncidentList);
                         //if we have any newly added incidents, create a notification
-                        notify('newIncident', 'New Incidents', 'Incidents recently added to list', newlyAdded) 
+                        notify('newIncident', 'New Incidents', 'Incidents recently added to list', newlyAdded);
                         //if we have any newly updated incidents, create a notification
-                        notify('UpdatedIncident', 'Updated Incidents', 'Incidents in list recently Updated', newlyUpdated) 
+                        notify('UpdatedIncident', 'Updated Incidents', 'Incidents in list recently Updated', newlyUpdated);
                     }
                 }
             }
