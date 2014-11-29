@@ -145,3 +145,11 @@ function getNewIncidents(currentList, newList) {
 refreshCount();
 //call function on an interval based on settings
 var intervalID = window.setInterval(refreshCount, rateOfRefresh * 1000);
+
+chrome.idle.onStateChanged.addListener(function(newState) {
+    if (newState == 'active') {
+        intervalID = window.setInterval(refreshCount, rateOfRefresh * 1000);
+    } else {
+        clearInterval(intervalID);
+    }
+});
