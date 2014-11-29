@@ -23,13 +23,16 @@ function restore_options() {
     chrome.storage.sync.get({
         query: 'active=true^assigned_to=javascript:getMyAssignments()^u_action_needed=true',
         rate: 10,
-        nofications:true
+        nofications:true,
+        avgTime:[]
     }, function(items) {
         console.log('in call back of restore_options');
         console.log(items);
+        var sum = _.reduce(items.avgTime, function(memo, num){ return memo + num; }, 0);
         document.getElementById('encodedQuery').value = items.query;
         document.getElementById('refreshRate').value = items.rate;
         document.getElementById('enableNotifications').checked = items.nofications ? true : false;
+        document.getElementById('avgResponse').innerText = Math.round((sum/items.avgTime.length) * 1000).toString() + ' ms';
     });
 }
 
