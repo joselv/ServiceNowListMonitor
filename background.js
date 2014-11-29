@@ -30,16 +30,24 @@ function refreshCount() {
             query: 'active=true^assigned_to=javascript:getMyAssignments()^stateIN-40,2^ORu_action_needed=true^u_action_needed=true^ORstate=-40',
             rate: 10,
             values: [],
-            nofications: false
+            nofications: false,
+            avgTime: []
         }, function(items) {
+            var startRequest = new Date();
             rateOfRefresh = items.rate;
             currentIncidentList = items.values;
+            currAvgTime = items.avgTime;
             //make the AJAX request to Hi to get the JSON list
             var xhr = new XMLHttpRequest();
             xhr.open("GET", "https://hi.service-now.com/incident.do?JSONv2&sysparm_action=getRecords&sysparm_query=" + items.query, true);
             xhr.onreadystatechange = function() {
                 //once the response is returned
                 if (xhr.readyState == 4) {
+                    var responseTime = (new Date() - startRequest) / 1000;
+                    if (currAvgTime.length > 19) {
+                        currAvgTime.shift();
+                    }
+                    currAvgTime.push(responseTime);
                     //parse the response
                     var resp = JSON.parse(xhr.responseText);
                     //update the badge
@@ -58,7 +66,8 @@ function refreshCount() {
                     };
                     //save new list to storage
                     chrome.storage.sync.set({
-                        'values': newIncidentList
+                        'values': newIncidentList,
+                        'avgTime': currAvgTime
                     });
                     //indicate that we are ready for new request
                     readyForNewREquest = true;
