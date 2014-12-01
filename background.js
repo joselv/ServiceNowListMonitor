@@ -46,7 +46,7 @@ function refreshCount() {
                 //once the response is returned
                 if (xhr.readyState == 4) {
                     var responseTime = (new Date() - startRequest) / 1000;
-                    if (currAvgTime.length > 19) {
+                    if (currAvgTime.length > 9) {
                         currAvgTime.shift();
                     }
                     currAvgTime.push(responseTime);
