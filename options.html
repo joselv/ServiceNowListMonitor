@@ -6,6 +6,7 @@
         Hi Checker Options
     </title>
     <link rel="stylesheet" href="pure-min.css">
+    <link rel="stylesheet" href="main.css">
     <style>
     .container {
         margin-left: 20px;
@@ -31,6 +32,12 @@
                     <input type="text" id="refreshRate" value="30">
                 </div>
                 <div class="pure-control-group">
+                    <label for="refreshRate">
+                        Avg Response:
+                    </label>
+                    <div id="avgResponse"></div>
+                </div>
+                <div class="pure-control-group">
                     <label for="enableNotifications">
                         Notifications Enabled
                     </label>
@@ -43,8 +50,8 @@
             </fieldset>
 
         </form>
-        <div>
-            <script src="options.js"></script>
+        <script src="underscore.js"></script>
+        <script src="options.js"></script>
 </body>
 
 </html>
