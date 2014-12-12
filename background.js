@@ -99,7 +99,7 @@ function notify(notifyID, notifyTitle, notifyMessage, notifyList) {
         chrome.notifications.create(notifyID, {
             iconUrl: "1416810744_kwrite.png",
             type: 'list',
-            title: notifyTitle,
+            title: notifyTitle + ' ' + new Date().toLocaleTimeString(),
             message: notifyMessage,
             priority: 1,
             items: notifyList
