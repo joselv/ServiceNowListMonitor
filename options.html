@@ -11,6 +11,28 @@
     .container {
         margin-left: 20px;
     }
+    .info,
+    .success,
+    .warning,
+    .error,
+    .validation {
+        border: 1px solid;
+        margin: 10px 0px;
+        padding: 15px 10px 15px 50px;
+        background-repeat: no-repeat;
+        background-position: 10px center;
+        width: 400px;
+    }
+    .warning {
+        color: #9F6000;
+        background-color: #FEEFB3;
+        background-image: url('warning.png');
+    }
+    .error {
+        color: #D8000C;
+        background-color: #FFBABA;
+        background-image: url('error.png');
+    }
     </style>
 </head>
 
@@ -29,7 +51,7 @@
                     <label for="refreshRate">
                         Refresh Rate (seconds):
                     </label>
-                    <input type="text" id="refreshRate" value="30">
+                    <input type="text" id="refreshRate" value="60">
                 </div>
                 <div class="pure-control-group">
                     <label for="refreshRate">
@@ -47,9 +69,13 @@
                 <div class="pure-control-group">
                     <button id="save" type="submit" class="pure-button pure-button-primary">Save</button>
                 </div>
+                <div class="pure-control-group" id="errorMsg">
+                    <div class="error">Error message</div>
+                </div>
             </fieldset>
 
         </form>
+
         <script src="underscore.js"></script>
         <script src="options.js"></script>
 </body>

@@ -36,6 +36,23 @@ function restore_options() {
     });
 }
 
+function isThisNumeric(val)  {
+    return !isNaN(parseFloat(val)) && isFinite(val);
+}
+
 document.addEventListener('DOMContentLoaded', restore_options);
 
 document.getElementById('save').addEventListener('click', save_options);
+
+document.getElementById("refreshRate").addEventListener('change',function(){      console.log('change noticed');
+    if (isThisNumeric(this.value)){
+      console.log('value is numeric');
+      if (parseInt(this.value)<60) {
+        console.log('value is less than 60');
+        var msg = document.getElementById("errorMsg");
+        //show warning about value lower than 60.
+      } 
+    } else {
+      //show error about numeric value
+    }
+},true);
