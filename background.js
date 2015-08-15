@@ -1,10 +1,9 @@
-//rate (in seconds) that the extension will check HI for changes to the list
 var rateOfRefresh = 10;
 //list of incidents that we already know about
 var currentIncidentList = [];
 //flag to use to skip a call to refreshCount() when the previous one hasn't completed
 var readyForNewREquest = true;
-
+var failedCount = 0;
 //change the badge color to green (perhaps we should make it a different color based on something...what?)
 chrome.browserAction.setBadgeBackgroundColor({
     color: '#14CC8C'
@@ -45,6 +44,13 @@ function refreshCount() {
             xhr.onreadystatechange = function() {
                 //once the response is returned
                 if (xhr.readyState == 4) {
+                    if (xhr.status == 401) {                    
+                        failedCount++;
+                        console.log(new Date().toLocaleTimeString() +  'Failed to connect to instance. Might have to re-establish your session. attempting again in ' +  (rateOfRefresh *  failedCount) + ' seconds');
+                        readyForNewREquest=true;                       
+                        return;
+                    }
+                    failedCount=0;
                     var responseTime = (new Date() - startRequest) / 1000;
                     if (currAvgTime.length > 9) {
                         currAvgTime.shift();
@@ -65,7 +71,7 @@ function refreshCount() {
                             created: resp.records[i].sys_created_on,
                             short_description: resp.records[i].short_description
                         });
-                    };
+                    }
                     //save new list to storage
                     chrome.storage.sync.set({
                         'values': newIncidentList,
@@ -86,8 +92,12 @@ function refreshCount() {
                         notify('UpdatedIncident', 'Updated Incidents', 'Incidents in list recently Updated', newlyUpdated);
                     }
                 }
+            };
+            try {
+                xhr.send();
+            } catch (e) {
+                console.log("something didn't work" + e);
             }
-            xhr.send();
         });
     }
 }
@@ -108,7 +118,7 @@ function notify(notifyID, notifyTitle, notifyMessage, notifyList) {
             if (chrome.runtime.lastError) {
                 console.log("Last error:", chrome.runtime.lastError);
             }
-        })
+        });
     }
 }
 
