@@ -12,10 +12,12 @@
     chrome.browserAction.onClicked.addListener(function() {
         logInfo('Loading list into new tab');
         chrome.storage.sync.get({
-            query: 'active=true^assigned_to=javascript:getMyAssignments()^stateIN-40,2^ORu_action_needed=true^u_action_needed=true^ORstate=-40'
+            query: 'active=true^assigned_to=javascript:getMyAssignments()^stateIN-40,2^ORu_action_needed=true^u_action_needed=true^ORstate=-40',
+            instance:'hi',
+            tableName:'incident'
         }, function(localStorage) {
             chrome.tabs.create({
-                url: 'https://hi.service-now.com/incident_list.do?sysparm_query=' + localStorage.query
+                url: 'https://'  + localStorage.instance + '.service-now.com/' + localStorage.tableName + '_list.do?sysparm_query=' + localStorage.query
             });
         });
     });
@@ -30,27 +32,35 @@
                 rate: 10,
                 values: [],
                 nofications: false,
-                avgTime: []
+                avgTime: [],
+                instance: 'hi',
+                tableName: 'incident'
             }, function(localStorage) {
                 logInfo(JSON.stringify(localStorage));
                 var requestStartTime = new Date();
                 knownIncidentList = localStorage.values;
                 var currentAvgTime = localStorage.avgTime;
                 var xhr = new XMLHttpRequest();
-                xhr.open("GET", "https://hi.service-now.com/incident.do?JSONv2&sysparm_action=getRecords&sysparm_query=" + localStorage.query, true);
+                xhr.open("GET", "https://" + localStorage.instance + ".service-now.com/" + localStorage.tableName + ".do?JSONv2&sysparm_action=getRecords&sysparm_query=" + localStorage.query, true);
                 xhr.onreadystatechange = function() {
                     if (xhr.readyState == 4) {
                         logInfo('readyState=' + xhr.readyState);
                         if (xhr.status != 200) {
                             logInfo('status=' + xhr.status);
                             failedRequestCount++;
-                            logWarn('Failed to connect to instance. Might have to re-establish your session. attempting again in ' + (localStorage.rate * failedRequestCount) + ' seconds');                            
+                            logWarn('Failed to connect to instance. Might have to re-establish your session. attempting again in ' + (localStorage.rate * failedRequestCount) + ' seconds');
                             lastRequestCompleted = true;
                             resetInterval(localStorage.rate * failedRequestCount);
                             return;
                         }
                         failedRequestCount = 0;
-                        saveResponseTime();
+                        
+                        var responseTime = (new Date() - requestStartTime) / 1000;
+                        if (currentAvgTime.length > 9) {
+                            currentAvgTime.shift();
+                        }
+                        currentAvgTime.push(responseTime);
+
                         var response = JSON.parse(xhr.responseText);
                         chrome.browserAction.setBadgeText({
                             text: response.records.length.toString()
@@ -158,14 +168,6 @@
             logInfo('Reseting interval to ' + newRate + ' ms');
             intervalID = window.setInterval(refreshBadgeCount, newRate);
         });
-    }
-
-    function saveResponseTime() {
-        var responseTime = (new Date() - requestStartTime) / 1000;
-        if (currentAvgTime.length > 9) {
-            currentAvgTime.shift();
-        }
-        currentAvgTime.push(responseTime);
     }
 
     function logInfo(msg) {
