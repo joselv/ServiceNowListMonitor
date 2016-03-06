@@ -10,7 +10,7 @@
 
 
     chrome.browserAction.onClicked.addListener(function() {
-        logInfo('clicking icon');
+        logInfo('Loading list into new tab');
         chrome.storage.sync.get({
             query: 'active=true^assigned_to=javascript:getMyAssignments()^stateIN-40,2^ORu_action_needed=true^u_action_needed=true^ORstate=-40'
         }, function(localStorage) {
@@ -40,22 +40,17 @@
                 var xhr = new XMLHttpRequest();
                 xhr.open("GET", "https://hi.service-now.com/incident.do?JSONv2&sysparm_action=getRecords&sysparm_query=" + localStorage.query, true);
                 xhr.onreadystatechange = function() {
-                    logInfo('onreadystatechange call back');
-                    logInfo('readyState=' + xhr.readyState);
-                    logInfo('status=' + xhr.status);
                     if (xhr.readyState == 4) {
-                        if (xhr.status == 401) {
+                        logInfo('readyState=' + xhr.readyState);
+                        if (xhr.status != 200) {
+                            logInfo('status=' + xhr.status);
                             failedRequestCount++;
                             logWarn('Failed to connect to instance. Might have to re-establish your session. attempting again in ' + (refreshRate * failedRequestCount) + ' seconds');
                             lastRequestCompleted = true;
                             return;
                         }
                         failedRequestCount = 0;
-                        var responseTime = (new Date() - requestStartTime) / 1000;
-                        if (currentAvgTime.length > 9) {
-                            currentAvgTime.shift();
-                        }
-                        currentAvgTime.push(responseTime);
+                        saveResponseTime();
                         var response = JSON.parse(xhr.responseText);
                         chrome.browserAction.setBadgeText({
                             text: response.records.length.toString()
@@ -153,6 +148,14 @@
             clearInterval(intervalID);
         }
     });
+
+    function saveResponseTime() {
+        var responseTime = (new Date() - requestStartTime) / 1000;
+        if (currentAvgTime.length > 9) {
+            currentAvgTime.shift();
+        }
+        currentAvgTime.push(responseTime);
+    }
 
     function logInfo(msg) {
         if (debugging)
