@@ -1,30 +1,32 @@
 function save_options() {
-    //save values to local storage
-    //TODO:add some validation
     var rr = document.getElementById('refreshRate').value;
     chrome.storage.sync.set({
         query: document.getElementById('encodedQuery').value,
         rate: isThisNumeric(rr) ? rr : 120,
-        nofications: document.getElementById('enableNotifications').checked
+        nofications: document.getElementById('enableNotifications').checked,
+        instance:document.getElementById('instance').value,
+        tableName:document.getElementById('tableName').value
     }, function() {
         //TODO:need a way to give feedback to user that changes were saved
     });
 }
 
-// stored in chrome.storage.
 function restore_options() {
-    // Use default value color = 'red' and likesColor = true.
     chrome.storage.sync.get({
-        query: 'active=true^assigned_to=javascript:getMyAssignments()^u_action_needed=true',
+        query: 'active=true',
         rate: 10,
         nofications: true,
-        avgTime: []
+        avgTime: [],
+        instance:'instance-name',
+        tableName:'incident'
     }, function(items) {
         var sum = _.reduce(items.avgTime, function(memo, num){ return memo + num; }, 0);
         document.getElementById('encodedQuery').value = items.query;
         document.getElementById('refreshRate').value = items.rate;
         document.getElementById('enableNotifications').checked = items.nofications ? true : false;
         document.getElementById('avgResponse').innerText = Math.round((sum/items.avgTime.length) * 1000).toString() + ' ms';
+        document.getElementById('instance').value = items.instance;
+        document.getElementById('tableName').value = items.tableName;
     });
 }
 

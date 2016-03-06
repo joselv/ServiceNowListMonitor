@@ -3,7 +3,7 @@
 
 <head>
     <title>
-        Hi Checker Options
+        ServiceNow list monitor
     </title>
     <link rel="stylesheet" href="pure-min.css">
     <link rel="stylesheet" href="main.css">
@@ -11,9 +11,21 @@
 
 <body>
     <div class="container">
-        <form class="pure-form pure-form-stacked">
+        <form class="pure-form pure-form-aligned">
             <fieldset>
-                <legend>HI list checker options</legend>
+                <legend>ServiceNow list monitor</legend>
+                <div class="pure-control-group">
+                    <label for="instance">
+                        Instance:
+                    </label>
+                    <input type="text" id="instance" value="instance-name">
+                </div>
+                <div class="pure-control-group">
+                    <label for="tableName">
+                        Table:
+                    </label>
+                    <input type="text" id="tableName" value="incident">
+                </div>                
                 <div class="pure-control-group">
                     <label for="encodedQuery">
                         Encoded Query:
@@ -26,11 +38,12 @@
                     </label>
                     <input type="text" id="refreshRate" value="60">
                 </div>
+
                 <div class="pure-control-group">
                     <label for="refreshRate">
                         Avg Response:
                     </label>
-                    <div id="avgResponse"></div>
+                    <div id="avgResponse" style="display:inline"></div>
                 </div>
                 <div class="pure-control-group">
                     <label for="enableNotifications">
@@ -49,9 +62,7 @@
                     <div class="warning">You are going to by querying HI more than once per minute!</div>
                 </div>
             </fieldset>
-
         </form>
-
         <script src="underscore.js"></script>
         <script src="options.js"></script>
 </body>
