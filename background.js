@@ -3,13 +3,14 @@
     var knownIncidentList = [];
     var lastRequestCompleted = true;
     var failedRequestCount = 0;
-
+    var debugging = true;
     chrome.browserAction.setBadgeBackgroundColor({
         color: '#14CC8C'
     });
 
 
     chrome.browserAction.onClicked.addListener(function() {
+        logInfo('clicking icon');
         chrome.storage.sync.get({
             query: 'active=true^assigned_to=javascript:getMyAssignments()^stateIN-40,2^ORu_action_needed=true^u_action_needed=true^ORstate=-40'
         }, function(localStorage) {
@@ -20,6 +21,7 @@
     });
 
     function refreshBadgeCount() {
+        logInfo('refresing badge count');
         if (lastRequestCompleted) {
             lastRequestCompleted = false;
             var newIncidentList = [];
@@ -30,6 +32,7 @@
                 nofications: false,
                 avgTime: []
             }, function(localStorage) {
+                logInfo(localStorage);
                 var requestStartTime = new Date();
                 refreshRate = localStorage.rate;
                 knownIncidentList = localStorage.values;
@@ -37,10 +40,13 @@
                 var xhr = new XMLHttpRequest();
                 xhr.open("GET", "https://hi.service-now.com/incident.do?JSONv2&sysparm_action=getRecords&sysparm_query=" + localStorage.query, true);
                 xhr.onreadystatechange = function() {
+                    logInfo('onreadystatechange call back');
+                    logInfo('readyState=' + xhr.readyState);
+                    logInfo('status=' + xhr.status);
                     if (xhr.readyState == 4) {
                         if (xhr.status == 401) {
                             failedRequestCount++;
-                            console.log(new Date().toLocaleTimeString() + 'Failed to connect to instance. Might have to re-establish your session. attempting again in ' + (refreshRate * failedRequestCount) + ' seconds');
+                            logWarn('Failed to connect to instance. Might have to re-establish your session. attempting again in ' + (refreshRate * failedRequestCount) + ' seconds');
                             lastRequestCompleted = true;
                             return;
                         }
@@ -140,10 +146,24 @@
     var intervalID = window.setInterval(refreshBadgeCount, refreshRate * 1000);
 
     chrome.idle.onStateChanged.addListener(function(newState) {
+        logInfo('state changed to' + newState);
         if (newState == 'active') {
             intervalID = window.setInterval(refreshBadgeCount, refreshRate * 1000);
         } else {
             clearInterval(intervalID);
         }
     });
+
+    function logInfo(msg) {
+        if (debugging)
+            console.info(new Date().toLocaleTimeString() + ' ' + msg);
+    }
+
+    function logWarn(msg) {
+        console.warn(new Date().toLocaleTimeString() + ' ' + msg);
+    }
+
+    function logError(msg) {
+        console.error(new Date().toLocaleTimeString() + ' ' + msg);
+    }
 })();
