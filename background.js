@@ -13,7 +13,7 @@
     chrome.browserAction.onClicked.addListener(function() {
         logInfo('Loading list into new tab');
         chrome.storage.sync.get({
-            query: 'active=true^assigned_to=javascript:getMyAssignments()^stateIN-40,2^ORu_action_needed=true^u_action_needed=true^ORstate=-40',
+            query: 'active=true^assigned_to=javascript:getMyAssignments()',
             instance: 'hi',
             tableName: 'incident'
         }, function(localStorage) {
@@ -30,7 +30,7 @@
             lastRequestCompleted = false;
             var newIncidentList = [];
             chrome.storage.sync.get({
-                query: 'active=true^assigned_to=javascript:getMyAssignments()^stateIN-40,2^ORu_action_needed=true^u_action_needed=true^ORstate=-40',
+                query: 'active=true^assigned_to=javascript:getMyAssignments()',
                 rate: defaultRefreshRate,
                 values: [],
                 nofications: false,
