@@ -14,7 +14,7 @@
         "idle"
     ],
     "browser_action": {
-        "default_icon": "1416810744_kwrite.png",
+        "default_icon": "list.png",
         "default_title": "Monitored List"
     },
     "background": {
