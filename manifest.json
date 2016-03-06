@@ -6,8 +6,8 @@
     "options_page": "options.html",
     "permissions": [
         "storage",
-        "alarms",
-        "https://hi.service-now.com/",
+        "alarms",        
+        "https://*.service-now.com/",
         "notifications",
         "tabs",
         "idle"
