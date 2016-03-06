@@ -1,7 +1,9 @@
-{
+    {
     "name": "ServiceNow List Monitor",
+    "short_name":"ServiceNow List Monitor",
     "version": "1.0",
     "manifest_version": 2,
+    "default_locale": "en",
     "description": "Monitors additions/changes to records in a ServiceNow table",
     "options_page": "options.html",
     "permissions": [
