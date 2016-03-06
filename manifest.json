@@ -1,8 +1,8 @@
 {
-    "name": "HI list Checker",
+    "name": "ServiceNow List Monitor",
     "version": "1.0",
     "manifest_version": 2,
-    "description": "Monitors list of incidents on HI",
+    "description": "Monitors additions/changes to records in a ServiceNow table",
     "options_page": "options.html",
     "permissions": [
         "storage",
@@ -14,7 +14,7 @@
     ],
     "browser_action": {
         "default_icon": "1416810744_kwrite.png",
-        "default_title": "Working list"
+        "default_title": "Monitored List"
     },
     "background": {
         "scripts": [

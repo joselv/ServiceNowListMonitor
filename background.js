@@ -4,6 +4,7 @@
     var lastRequestCompleted = true;
     var failedRequestCount = 0;
     var debugging = true;
+    var currentRefreshRate = defaultRefreshRate;
     chrome.browserAction.setBadgeBackgroundColor({
         color: '#14CC8C'
     });
@@ -13,11 +14,12 @@
         logInfo('Loading list into new tab');
         chrome.storage.sync.get({
             query: 'active=true^assigned_to=javascript:getMyAssignments()^stateIN-40,2^ORu_action_needed=true^u_action_needed=true^ORstate=-40',
-            instance:'hi',
-            tableName:'incident'
+            instance: 'hi',
+            tableName: 'incident'
         }, function(localStorage) {
+            resetInterval();
             chrome.tabs.create({
-                url: 'https://'  + localStorage.instance + '.service-now.com/' + localStorage.tableName + '_list.do?sysparm_query=' + localStorage.query
+                url: 'https://' + localStorage.instance + '.service-now.com/' + localStorage.tableName + '_list.do?sysparm_query=' + localStorage.query
             });
         });
     });
@@ -29,7 +31,7 @@
             var newIncidentList = [];
             chrome.storage.sync.get({
                 query: 'active=true^assigned_to=javascript:getMyAssignments()^stateIN-40,2^ORu_action_needed=true^u_action_needed=true^ORstate=-40',
-                rate: 10,
+                rate: defaultRefreshRate,
                 values: [],
                 nofications: false,
                 avgTime: [],
@@ -54,7 +56,7 @@
                             return;
                         }
                         failedRequestCount = 0;
-                        
+
                         var responseTime = (new Date() - requestStartTime) / 1000;
                         if (currentAvgTime.length > 9) {
                             currentAvgTime.shift();
@@ -91,6 +93,10 @@
                     }
                 };
                 xhr.send();
+                if (currentRefreshRate !== localStorage.rate) {
+                    currentRefreshRate = localStorage.rate;
+                    resetInterval(currentRefreshRate);
+                }
             });
         }
     }
