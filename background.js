@@ -1,5 +1,5 @@
 (function() {
-    var refreshRate = 10;
+    var defaultRefreshRate = 10;
     var knownIncidentList = [];
     var lastRequestCompleted = true;
     var failedRequestCount = 0;
@@ -32,9 +32,8 @@
                 nofications: false,
                 avgTime: []
             }, function(localStorage) {
-                logInfo(localStorage);
+                logInfo(JSON.stringify(localStorage));
                 var requestStartTime = new Date();
-                refreshRate = localStorage.rate;
                 knownIncidentList = localStorage.values;
                 var currentAvgTime = localStorage.avgTime;
                 var xhr = new XMLHttpRequest();
@@ -45,8 +44,9 @@
                         if (xhr.status != 200) {
                             logInfo('status=' + xhr.status);
                             failedRequestCount++;
-                            logWarn('Failed to connect to instance. Might have to re-establish your session. attempting again in ' + (refreshRate * failedRequestCount) + ' seconds');
+                            logWarn('Failed to connect to instance. Might have to re-establish your session. attempting again in ' + (localStorage.rate * failedRequestCount) + ' seconds');                            
                             lastRequestCompleted = true;
+                            resetInterval(localStorage.rate * failedRequestCount);
                             return;
                         }
                         failedRequestCount = 0;
@@ -138,16 +138,27 @@
 
     refreshBadgeCount();
 
-    var intervalID = window.setInterval(refreshBadgeCount, refreshRate * 1000);
+    var intervalID = window.setInterval(refreshBadgeCount, defaultRefreshRate * 1000);
 
     chrome.idle.onStateChanged.addListener(function(newState) {
         logInfo('state changed to' + newState);
         if (newState == 'active') {
-            intervalID = window.setInterval(refreshBadgeCount, refreshRate * 1000);
+            intervalID = window.setInterval(refreshBadgeCount, defaultRefreshRate * 1000);
         } else {
             clearInterval(intervalID);
         }
     });
+
+    function resetInterval(newRate) {
+        window.clearInterval(intervalID);
+        chrome.storage.sync.get({
+            rate: defaultRefreshRate,
+        }, function(lStorage) {
+            newRate = newRate ? newRate * 1000 : lStorage.rate * 1000;
+            logInfo('Reseting interval to ' + newRate + ' ms');
+            intervalID = window.setInterval(refreshBadgeCount, newRate);
+        });
+    }
 
     function saveResponseTime() {
         var responseTime = (new Date() - requestStartTime) / 1000;
