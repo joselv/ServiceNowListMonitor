@@ -18,13 +18,11 @@
             instance: '',
             tableName: ''
         }, function(localStorage) {
-            if (localStorage.instance && localStorage.tableName && localStorage.query) {
+            if (hasRequiredOptions(localStorage)) {
                 resetInterval();
                 chrome.tabs.create({
                     url: 'https://' + localStorage.instance + '.service-now.com/' + localStorage.tableName + '_list.do?sysparm_query=' + localStorage.query
                 });
-            } else {
-                failedOptionsCheck();
             }
         });
     });
@@ -42,7 +40,7 @@
                 instance: '',
                 tableName: ''
             }, function(localStorage) {
-                if (localStorage.instance && localStorage.tableName && localStorage.query) {
+                if (hasRequiredOptions(localStorage)) {
                     if (needOptions) {
                         needOptions = false;
                         chrome.browserAction.setBadgeBackgroundColor({ color: '#14CC8C' });
@@ -109,7 +107,6 @@
                     }
                 } else {
                     logInfo('Need to configure instance name,table name and query');
-                    failedOptionsCheck();
                 }
             });
         }
@@ -190,10 +187,14 @@
         });
     }
 
-    function failedOptionsCheck() {
-        chrome.browserAction.setBadgeText({ text: "!" });
-        chrome.browserAction.setBadgeBackgroundColor({ color: '#B0171F' });
-        needOptions = true;
+    function hasRequiredOptions(storage) {
+        if (storage.instance && storage.tableName && storage.query) {
+            return true;
+        } else {
+            chrome.browserAction.setBadgeText({ text: "!" });
+            chrome.browserAction.setBadgeBackgroundColor({ color: '#B0171F' });
+            needOptions = true;
+        }
     }
 
     function logInfo(msg) {
