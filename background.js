@@ -1,9 +1,10 @@
 (function() {
-    var defaultRefreshRate = 10;
+    var defaultRefreshRate = 30;
     var knownIncidentList = [];
     var lastRequestCompleted = true;
     var failedRequestCount = 0;
     var debugging = true;
+    var needOptions = false;
     var currentRefreshRate = defaultRefreshRate;
     chrome.browserAction.setBadgeBackgroundColor({
         color: '#14CC8C'
@@ -13,89 +14,102 @@
     chrome.browserAction.onClicked.addListener(function() {
         logInfo('Loading list into new tab');
         chrome.storage.sync.get({
-            query: 'active=true^assigned_to=javascript:getMyAssignments()',
-            instance: 'hi',
-            tableName: 'incident'
+            query: '',
+            instance: '',
+            tableName: ''
         }, function(localStorage) {
-            resetInterval();
-            chrome.tabs.create({
-                url: 'https://' + localStorage.instance + '.service-now.com/' + localStorage.tableName + '_list.do?sysparm_query=' + localStorage.query
-            });
+            if (localStorage.instance && localStorage.tableName && localStorage.query) {
+                resetInterval();
+                chrome.tabs.create({
+                    url: 'https://' + localStorage.instance + '.service-now.com/' + localStorage.tableName + '_list.do?sysparm_query=' + localStorage.query
+                });
+            } else {
+                failedOptionsCheck();
+            }
         });
     });
 
     function refreshBadgeCount() {
         logInfo('refresing badge count');
         if (lastRequestCompleted) {
-            lastRequestCompleted = false;
             var newIncidentList = [];
             chrome.storage.sync.get({
-                query: 'active=true^assigned_to=javascript:getMyAssignments()',
+                query: '',
                 rate: defaultRefreshRate,
                 values: [],
                 nofications: false,
                 avgTime: [],
-                instance: 'hi',
-                tableName: 'incident'
+                instance: '',
+                tableName: ''
             }, function(localStorage) {
-                logInfo(JSON.stringify(localStorage));
-                var requestStartTime = new Date();
-                knownIncidentList = localStorage.values;
-                var currentAvgTime = localStorage.avgTime;
-                var xhr = new XMLHttpRequest();
-                xhr.open("GET", "https://" + localStorage.instance + ".service-now.com/" + localStorage.tableName + ".do?JSONv2&sysparm_action=getRecords&sysparm_query=" + localStorage.query, true);
-                xhr.onreadystatechange = function() {
-                    if (xhr.readyState == 4) {
-                        logInfo('readyState=' + xhr.readyState);
-                        if (xhr.status != 200) {
-                            logInfo('status=' + xhr.status);
-                            failedRequestCount++;
-                            logWarn('Failed to connect to instance. Might have to re-establish your session. attempting again in ' + (localStorage.rate * failedRequestCount) + ' seconds');
-                            lastRequestCompleted = true;
-                            resetInterval(localStorage.rate * failedRequestCount);
-                            return;
-                        }
-                        failedRequestCount = 0;
-
-                        var responseTime = (new Date() - requestStartTime) / 1000;
-                        if (currentAvgTime.length > 9) {
-                            currentAvgTime.shift();
-                        }
-                        currentAvgTime.push(responseTime);
-
-                        var response = JSON.parse(xhr.responseText);
-                        chrome.browserAction.setBadgeText({
-                            text: response.records.length.toString()
-                        });
-
-                        for (var i = response.records.length - 1; i >= 0; i--) {
-                            newIncidentList.push({
-                                number: response.records[i].number,
-                                updated: response.records[i].sys_updated_on,
-                                created: response.records[i].sys_created_on,
-                                short_description: response.records[i].short_description
-                            });
-                        }
-
-                        chrome.storage.sync.set({
-                            'values': newIncidentList,
-                            'avgTime': currentAvgTime
-                        });
-
-                        lastRequestCompleted = true;
-
-                        if (localStorage.nofications) {
-                            var newlyAdded = pluckNewUnknownIncidents(knownIncidentList, newIncidentList);
-                            var newlyUpdated = pluckUpdatedKnownIncidents(knownIncidentList, newIncidentList);
-                            notify('newIncident', 'New Incidents', 'Incidents recently added to list', newlyAdded);
-                            notify('UpdatedIncident', 'Updated Incidents', 'Incidents in list recently Updated', newlyUpdated);
-                        }
+                if (localStorage.instance && localStorage.tableName && localStorage.query) {
+                    if (needOptions) {
+                        needOptions = false;
+                        chrome.browserAction.setBadgeBackgroundColor({ color: '#14CC8C' });
                     }
-                };
-                xhr.send();
-                if (currentRefreshRate !== localStorage.rate) {
-                    currentRefreshRate = localStorage.rate;
-                    resetInterval(currentRefreshRate);
+                    lastRequestCompleted = false;
+                    logInfo(JSON.stringify(localStorage));
+                    var requestStartTime = new Date();
+                    knownIncidentList = localStorage.values;
+                    var currentAvgTime = localStorage.avgTime;
+                    var xhr = new XMLHttpRequest();
+                    xhr.open("GET", "https://" + localStorage.instance + ".service-now.com/" + localStorage.tableName + ".do?JSONv2&sysparm_action=getRecords&sysparm_query=" + localStorage.query, true);
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState == 4) {
+                            lastRequestCompleted = true;
+                            logInfo('readyState=' + xhr.readyState);
+                            if (xhr.status != 200) {
+                                logInfo('status=' + xhr.status);
+                                failedRequestCount++;
+                                logWarn('Failed to connect to instance. Might have to re-establish your session. attempting again in ' + (localStorage.rate * failedRequestCount) + ' seconds');
+                                lastRequestCompleted = true;
+                                resetInterval(localStorage.rate * failedRequestCount);
+                                return;
+                            }
+                            failedRequestCount = 0;
+
+                            var responseTime = (new Date() - requestStartTime) / 1000;
+                            if (currentAvgTime.length > 9) {
+                                currentAvgTime.shift();
+                            }
+                            currentAvgTime.push(responseTime);
+
+                            var response = JSON.parse(xhr.responseText);
+                            chrome.browserAction.setBadgeText({
+                                text: response.records.length.toString()
+                            });
+
+                            for (var i = response.records.length - 1; i >= 0; i--) {
+                                newIncidentList.push({
+                                    number: response.records[i].number,
+                                    updated: response.records[i].sys_updated_on,
+                                    created: response.records[i].sys_created_on,
+                                    short_description: response.records[i].short_description
+                                });
+                            }
+
+                            chrome.storage.sync.set({
+                                'values': newIncidentList,
+                                'avgTime': currentAvgTime
+                            });
+
+
+                            if (localStorage.nofications) {
+                                var newlyAdded = pluckNewUnknownIncidents(knownIncidentList, newIncidentList);
+                                var newlyUpdated = pluckUpdatedKnownIncidents(knownIncidentList, newIncidentList);
+                                notify('newIncident', 'New Incidents', 'Incidents recently added to list', newlyAdded);
+                                notify('UpdatedIncident', 'Updated Incidents', 'Incidents in list recently Updated', newlyUpdated);
+                            }
+                        }
+                    };
+                    xhr.send();
+                    if (currentRefreshRate !== localStorage.rate) {
+                        currentRefreshRate = localStorage.rate;
+                        resetInterval(currentRefreshRate);
+                    }
+                } else {
+                    logInfo('Need to configure instance name,table name and query');
+                    failedOptionsCheck();
                 }
             });
         }
@@ -104,7 +118,7 @@
     function notify(id, title, message, list) {
         if (list.length > 0) {
             chrome.notifications.create(id, {
-                iconUrl: "1416810744_kwrite.png",
+                iconUrl: "list.png",
                 type: 'list',
                 title: title + ' ' + new Date().toLocaleTimeString(),
                 message: message,
@@ -174,6 +188,12 @@
             logInfo('Reseting interval to ' + newRate + ' ms');
             intervalID = window.setInterval(refreshBadgeCount, newRate);
         });
+    }
+
+    function failedOptionsCheck() {
+        chrome.browserAction.setBadgeText({ text: "!" });
+        chrome.browserAction.setBadgeBackgroundColor({ color: '#B0171F' });
+        needOptions = true;
     }
 
     function logInfo(msg) {
