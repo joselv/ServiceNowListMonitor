@@ -23,6 +23,10 @@
                 chrome.tabs.create({
                     url: 'https://' + localStorage.instance + '.service-now.com/' + localStorage.tableName + '_list.do?sysparm_query=' + localStorage.query
                 });
+            } else {
+                chrome.tabs.create({
+                    url:'options.html'
+                });
             }
         });
     });
