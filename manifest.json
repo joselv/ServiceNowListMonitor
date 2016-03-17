@@ -1,13 +1,13 @@
     {
     "name": "ServiceNow List Monitor",
     "short_name":"ServiceNow List Monitor",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "manifest_version": 2,
     "description": "Monitors additions/changes to records in a ServiceNow table",
     "options_page": "options.html",
     "permissions": [
         "storage",
-        "alarms",        
+        "alarms",
         "https://*.service-now.com/",
         "notifications",
         "tabs",
