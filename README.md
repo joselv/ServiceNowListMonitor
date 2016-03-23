@@ -1,22 +1,14 @@
-hiCheck
+ServiceNow List Monitor
 =======
-
-HI list monitor
-
 #Installation
 =======
-1) Using Chrome navigate to [chrome://extensions/](chrome://extensions/)
-
-2) If not already, enable developer mode.
-
-3) Click Load Unpacked Extension.
-
-4) Select the folder containing the extension files.
-
+[ServiceNow List Monitor](https://chrome.google.com/webstore/detail/servicenow-list-monitor/eehjjepegmflmajknjnjpdccbifkindb "Chrome Web store")
 
 #Configuration
 ==========
-**Encoded Query** Encoded query for incident table that the extension will monitor
+**Encoded Query** Encoded query for task table that the extension will monitor
+
+[Generating Encoded Query strings](http://wiki.servicenow.com/index.php?title=Encoded_Query_Strings#Generating_Encoded_Query_Strings_through_a_Filter&gsc.tab=0 "ServiceNow Wiki")
 
 **Refresh Rate (seconds):** Rate at which the extension will check for changes in the list.
 
