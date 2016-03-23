@@ -12,24 +12,9 @@
 
 
     chrome.browserAction.onClicked.addListener(function() {
-        logInfo('Loading list into new tab');
-        chrome.storage.sync.get({
-            query: '',
-            instance: '',
-            tableName: ''
-        }, function(localStorage) {
-            if (hasRequiredOptions(localStorage)) {
-                resetInterval();
-                chrome.tabs.create({
-                    url: 'https://' + localStorage.instance + '.service-now.com/' + localStorage.tableName + '_list.do?sysparm_query=' + localStorage.query
-                });
-            } else {
-                chrome.tabs.create({
-                    url:'options.html'
-                });
-            }
-        });
+      openList();
     });
+
 
     function refreshBadgeCount() {
         logInfo('refresing badge count');
@@ -180,6 +165,29 @@
         }
     });
 
+    chrome.notifications.onClicked.addListener(function(notificationId) {
+      openList(notificationId);
+    });
+
+    function openList(source){
+      logInfo('Loading list into new tab');
+      chrome.storage.sync.get({
+          query: '',
+          instance: '',
+          tableName: ''
+      }, function(localStorage) {
+          if (hasRequiredOptions(localStorage)) {
+              resetInterval();
+              chrome.tabs.create({
+                  url: 'https://' + localStorage.instance + '.service-now.com/' + localStorage.tableName + '_list.do?sysparm_query=' + localStorage.query
+              });
+          } else {
+              chrome.tabs.create({
+                  url:'options.html'
+              });
+          }
+      });
+    }
     function resetInterval(newRate) {
         window.clearInterval(intervalID);
         chrome.storage.sync.get({
