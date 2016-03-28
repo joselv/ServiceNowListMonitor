@@ -5,59 +5,70 @@
     <title>
         ServiceNow list monitor
     </title>
-    <link rel="stylesheet" href="pure-min.css">
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="main.css">
 </head>
 
 <body>
     <div class="container">
-        <form class="pure-form pure-form-aligned">
+      <legend>ServiceNow list monitor</legend>
+        <form class="form-horizontal">
+          <div class="row">
+          <div class="form-group">
+             <label for="instance" class="col-sm-2 control-label">Instance</label>
+             <div class="col-sm-7">
+                <input type="text" id="instance" value="" class="form-control" placeholder="Instance Name">
+             </div>
+             <div class="col-sm-3">
+             <div class="panel panel-default">
+               <div class="panel-heading">
+                 <h3 class="panel-title">Panel title</h3>
+               </div>
+               <div class="panel-body">
+                 Panel content
+               </div>
+             </div>
+           </div>
+           </div>
+
+        </div>
+           <div class="form-group">
+              <label for="tableName" class="col-sm-2 control-label">Table</label>
+              <div class="col-sm-10">
+                   <input type="text" id="tableName" value="" class="form-control" placeholder="table_name">
+              </div>
+            </div>
+            <div class="form-group">
+               <label for="encodedQuery" class="col-sm-2 control-label">Encoded Query</label>
+               <div class="col-sm-10">
+                    <input type="text" id="encodedQuery" value="" class="form-control" placeholder="caller_id=javascript:gs.getUserID()^active=true">
+                      <a title="Generate encoded strings from a filter" href="http://wiki.servicenow.com/index.php?title=Encoded_Query_Strings#Generating_Encoded_Query_Strings_through_a_Filter" target="_blank"><img src="round.png"/></a>
+               </div>
+             </div>
+             <div class="form-group">
+                <label for="refreshRate" class="col-sm-2 control-label">Refresh Rate (seconds)</label>
+                <div class="col-sm-10">
+                     <input type="text" id="refreshRate" value="60" class="form-control" placeholder="caller_id=javascript:gs.getUserID()^active=true">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label">Avg Response</label>
+                <div class="col-sm-10">
+                  <p id="avgResponse" class="form-control-static" style="display:inline"></p>
+                </div>
+              </div>
+              <div class="form-group">
+                 <label for="enableNotifications" class="col-sm-2 control-label">Notifications Enabled</label>
+                 <div class="col-sm-10">
+                      <input type="checkbox" id="enableNotifications" class="form-control">
+                 </div>
+               </div>
+                 <button id="save" type="submit" class="btn btn-primary">Save</button>
             <fieldset>
-                <legend>ServiceNow list monitor</legend>
-                <div class="pure-control-group">
-                    <label for="instance">
-                        Instance:
-                    </label>
-                    <input type="text" id="instance" value="" placeholder="Instance Name">
-                </div>
-                <div class="pure-control-group">
-                    <label for="tableName">
-                        Table:
-                    </label>
-                    <input type="text" id="tableName" value="" placeholder="table_name">
-                </div>
-                <div class="pure-control-group">
-                    <label for="encodedQuery">
-                        Encoded Query:
-                    </label>
-                    <input class="pure-input-2-3" type="text" id="encodedQuery" value="" placeholder="caller_id=javascript:gs.getUserID()^active=true">
-                    <a title="Generate encoded strings from a filter" href="http://wiki.servicenow.com/index.php?title=Encoded_Query_Strings#Generating_Encoded_Query_Strings_through_a_Filter" target="_blank"><img src="round.png"/></a>
-                    <div>
 
-                    </div>
-                </div>
-                <div class="pure-control-group">
-                    <label for="refreshRate">
-                        Refresh Rate (seconds):
-                    </label>
-                    <input type="text" id="refreshRate" value="60">
-                </div>
-
-                <div class="pure-control-group">
-                    <label for="refreshRate">
-                        Avg Response:
-                    </label>
-                    <div id="avgResponse" style="display:inline"></div>
-                </div>
-                <div class="pure-control-group">
-                    <label for="enableNotifications">
-                        Notifications Enabled
-                    </label>
-                    <input type="checkbox" id="enableNotifications">
-                </div>
                 <div id="status"></div>
                 <div class="pure-control-group">
-                    <button id="save" type="submit" class="pure-button pure-button-primary">Save</button>
+
                 </div>
                 <div class="pure-control-group hideIt" id="errorMsg">
                     <div class="error">Refresh rate needs to be numeric! Will default to 2 minutes!</div>
