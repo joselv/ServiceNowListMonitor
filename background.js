@@ -104,7 +104,7 @@
     function notify(id, title, message, list) {
         if (list.length > 0) {
             chrome.notifications.create(id, {
-                iconUrl: "list.png",
+                iconUrl: "img/list.png",
                 type: 'list',
                 title: title + ' ' + new Date().toLocaleTimeString(),
                 message: message,

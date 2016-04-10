@@ -14,7 +14,7 @@
         "idle"
     ],
     "browser_action": {
-        "default_icon": "list.png",
+        "default_icon": "img/list.png",
         "default_title": "Monitored List"
     },
     "background": {
@@ -25,8 +25,8 @@
         "persistent": true
     },
     "icons": {
-        "32": "list.png",
-        "48": "paper_48.png",
-        "128": "paper_128.png"
+        "32": "img/list.png",
+        "48": "img/paper_48.png",
+        "128": "img/paper_128.png"
   }
 }
