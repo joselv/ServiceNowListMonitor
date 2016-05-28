@@ -24,7 +24,13 @@ function restore_options() {
         document.getElementById('encodedQuery').value = items.query;
         document.getElementById('refreshRate').value = items.rate;
         document.getElementById('enableNotifications').checked = items.nofications ? true : false;
-        document.getElementById('avgResponse').innerText = Math.round((sum/items.avgTime.length) * 1000).toString() + ' ms';
+        var responseTimeAverage;
+        if(items.avgTime.length>0) {
+          responseTimeAverage = Math.round((sum/items.avgTime.length) * 1000).toString() + ' ms';
+        } else {
+          responseTimeAverage = "Waiting for more data to calculate..";
+        }
+        document.getElementById('avgResponse').innerText = responseTimeAverage;
         document.getElementById('instance').value = items.instance;
         document.getElementById('tableName').value = items.tableName;
     });
