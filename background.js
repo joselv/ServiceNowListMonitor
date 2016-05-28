@@ -3,18 +3,24 @@
     var knownIncidentList = [];
     var lastRequestCompleted = true;
     var failedRequestCount = 0;
-    var debugging = true;
+    var debugging = false;
     var needOptions = false;
     var currentRefreshRate = defaultRefreshRate;
-    chrome.browserAction.setBadgeBackgroundColor({
-        color: '#14CC8C'
+
+    chrome.browserAction.setBadgeBackgroundColor({ color: '#14CC8C' });
+
+    chrome.browserAction.onClicked.addListener(function() { openList(); });
+
+    chrome.notifications.onClicked.addListener(function(notificationId) { openList(notificationId); });
+
+    chrome.idle.onStateChanged.addListener(function(newState) {
+        logInfo('state changed to' + newState);
+        if (newState == 'active') {
+            intervalID = window.setInterval(refreshBadgeCount, defaultRefreshRate * 1000);
+        } else {
+            clearInterval(intervalID);
+        }
     });
-
-
-    chrome.browserAction.onClicked.addListener(function() {
-      openList();
-    });
-
 
     function refreshBadgeCount() {
         logInfo('refresing badge count');
@@ -78,6 +84,13 @@
                             chrome.storage.sync.set({
                                 'values': newIncidentList,
                                 'avgTime': currentAvgTime
+                            }, function() {
+                                if (chrome.runtime.lastError) {
+                                    chrome.browserAction.setTitle({ title: "Result set is too large to track!" });
+                                    chrome.browserAction.setBadgeBackgroundColor({ color: '#B0171F' });
+                                } else {
+                                    chrome.browserAction.setBadgeBackgroundColor({ color: '#14CC8C' });
+                                }
                             });
 
 
@@ -151,48 +164,37 @@
         });
     }
 
-
     refreshBadgeCount();
 
     var intervalID = window.setInterval(refreshBadgeCount, defaultRefreshRate * 1000);
 
-    chrome.idle.onStateChanged.addListener(function(newState) {
-        logInfo('state changed to' + newState);
-        if (newState == 'active') {
-            intervalID = window.setInterval(refreshBadgeCount, defaultRefreshRate * 1000);
-        } else {
-            clearInterval(intervalID);
-        }
-    });
-
-    chrome.notifications.onClicked.addListener(function(notificationId) {
-      openList(notificationId);
-    });
-
-    function openList(source){
-      logInfo('Loading list into new tab');
-      chrome.storage.sync.get({
-          query: '',
-          instance: '',
-          tableName: ''
-      }, function(localStorage) {
-          if (hasRequiredOptions(localStorage)) {
-              resetInterval();
-              chrome.tabs.create({
-                  url: 'https://' + localStorage.instance + '.service-now.com/' + localStorage.tableName + '_list.do?sysparm_query=' + localStorage.query
-              });
-          } else {
-              chrome.tabs.create({
-                  url:'options.html'
-              });
-          }
-      });
+    function openList(source) {
+        logInfo('Loading list into new tab');
+        chrome.storage.sync.get({
+            query: '',
+            instance: '',
+            tableName: ''
+        }, function(localStorage) {
+            if (hasRequiredOptions(localStorage)) {
+                resetInterval();
+                chrome.tabs.create({
+                    url: 'https://' + localStorage.instance + '.service-now.com/' + localStorage.tableName + '_list.do?sysparm_query=' + localStorage.query
+                });
+            } else {
+                chrome.tabs.create({
+                    url: 'options.html'
+                });
+            }
+        });
     }
+
     function resetInterval(newRate) {
         window.clearInterval(intervalID);
         chrome.storage.sync.get({
             rate: defaultRefreshRate,
         }, function(lStorage) {
+            if (newRate > 300)
+                newRate = 300; //cap off backoff to 5 minutes
             newRate = newRate ? newRate * 1000 : lStorage.rate * 1000;
             logInfo('Reseting interval to ' + newRate + ' ms');
             intervalID = window.setInterval(refreshBadgeCount, newRate);
@@ -205,6 +207,7 @@
         } else {
             chrome.browserAction.setBadgeText({ text: "!" });
             chrome.browserAction.setBadgeBackgroundColor({ color: '#B0171F' });
+            chrome.browserAction.setTitle({ title: "Configure required options" });
             needOptions = true;
         }
     }

@@ -14,7 +14,7 @@ function save_options() {
 function restore_options() {
     chrome.storage.sync.get({
         query: 'active=true',
-        rate: 10,
+        rate: 60,
         nofications: true,
         avgTime: [],
         instance:'instance-name',

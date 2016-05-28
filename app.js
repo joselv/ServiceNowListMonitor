@@ -2,8 +2,7 @@
     var app = angular.module('options', []);
 
     app.controller('OptionsController', function($scope, $http) {
-        this.instanceName="";
-        this.statusimg="";
+        this.instanceName = "";
         this.opts = [{
             title: "Instance",
             content: "Enter the name of your instance."
