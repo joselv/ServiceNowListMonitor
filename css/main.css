@@ -25,3 +25,11 @@
 .hideIt {
     display: none;
 }
+#imageList {
+    margin-left: 19px;
+    margin-top: 12px;
+}
+.required {
+    margin-right: 3px;
+    color: red;
+}

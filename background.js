@@ -6,12 +6,20 @@
     var debugging = false;
     var needOptions = false;
     var currentRefreshRate = defaultRefreshRate;
+    var lastItem = "";
 
     chrome.browserAction.setBadgeBackgroundColor({ color: '#14CC8C' });
 
     chrome.browserAction.onClicked.addListener(function() { openList(); });
 
     chrome.notifications.onClicked.addListener(function(notificationId) { openList(notificationId); });
+
+    chrome.storage.onChanged.addListener(function(changes, areaName) {
+        if (areaName == 'sync') {
+            if (changes.instance || changes.tableName || changes.query)
+                refreshBadgeCount();
+        }
+    });
 
     chrome.idle.onStateChanged.addListener(function(newState) {
         logInfo('state changed to' + newState);
@@ -116,6 +124,7 @@
 
     function notify(id, title, message, list) {
         if (list.length > 0) {
+            lastItem = buildQuery(list);
             chrome.notifications.create(id, {
                 iconUrl: "img/list.png",
                 type: 'list',
@@ -130,7 +139,6 @@
             });
         }
     }
-
 
     function pluckUpdatedKnownIncidents(knownList, newList) {
         var updatedIncidents = [];
@@ -149,7 +157,6 @@
             };
         });
     }
-
 
     function pluckNewUnknownIncidents(knownList, retrievedList) {
         var diffList = _.difference(_.pluck(retrievedList, 'number'), _.pluck(knownList, 'number'));
@@ -177,9 +184,15 @@
         }, function(localStorage) {
             if (hasRequiredOptions(localStorage)) {
                 resetInterval();
-                chrome.tabs.create({
-                    url: 'https://' + localStorage.instance + '.service-now.com/' + localStorage.tableName + '_list.do?sysparm_query=' + localStorage.query
-                });
+                if (source) {
+                    chrome.tabs.create({
+                        url: 'https://' + localStorage.instance + '.service-now.com/' + localStorage.tableName + '_list.do?sysparm_query=' + lastItem
+                    });
+                } else {
+                    chrome.tabs.create({
+                        url: 'https://' + localStorage.instance + '.service-now.com/' + localStorage.tableName + '_list.do?sysparm_query=' + localStorage.query
+                    });
+                }
             } else {
                 chrome.tabs.create({
                     url: 'options.html'
@@ -210,6 +223,16 @@
             chrome.browserAction.setTitle({ title: "Configure required options" });
             needOptions = true;
         }
+    }
+
+    function buildQuery(list) {
+        var queryString = "numberIN";
+        for (var i = 0; i < list.length; i++) {
+            if (i > 0)
+                queryString += ",";
+            queryString += list[i].title;
+        }
+        return queryString;
     }
 
     function logInfo(msg) {

@@ -1,57 +1,74 @@
 <!DOCTYPE html>
 <html ng-app="options">
+
 <head>
     <title>
         ServiceNow list monitor options
     </title>
     <link rel="stylesheet" href="libraries/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="css/main.css">
+    <script src="libraries/jquery-1.12.3.min.js"></script>
+    <script src="libraries/angular.min.js"></script>
+    <script src="app.js"></script>
 </head>
-<body>
-    <div class="container" ng-controller="OptionsController as options">
+
+<body ng-controller="OptionsController">
+    <div class="container">
         <legend>ServiceNow list monitor options</legend>
         <div class="container">
             <div class="row">
                 <div class="col-md-9">
                     <form class="form-horizontal">
-                        <div class="form-group" ng-mouseover="options.activeOption=0" ng-mouseleave="options.activeOption=-1">
-                            <label for="instance" class="col-sm-2 control-label">Instance</label>
+                        <div class="form-group" ng-mouseover="activeOption=0" ng-mouseleave="activeOption=-1">
+                            <label for="instance" class="col-sm-2 control-label"><span class="required" ng-show="!instanceName || instanceName=='instance-name'">*</span>Instance</label>
                             <div class="col-sm-10">
-                                <input type="text" id="instance" ng-model="options.instanceName" class="form-control" placeholder="Instance Name">
+                                <input type="text" id="instance" ng-model="instanceName" class="form-control" placeholder="Instance Name" tabindex="1">
                             </div>
                         </div>
-                        <div class="form-group" ng-mouseover="options.activeOption=1" ng-mouseleave="options.activeOption=-1">
-                            <label for="tableName" class="col-sm-2 control-label">Table</label>
+                        <div class="form-group">
+                            <label for="instanceLabel" class="col-sm-2 control-label">&nbsp;</label>
+                            <p class="form-control-static" id="instanceLabel">
+                                <a href="https://{{instanceName}}.service-now.com" target="_blank">https://{{instanceName}}.service-now.com/{{tableName}}<span ng-show="tableName">.do</span></a>
+                                <br/>
+                            </p>
+                        </div>
+                        <div class="form-group" ng-mouseover="activeOption=1" ng-mouseleave="activeOption=-1">
+                            <label for="tableName" class="col-sm-2 control-label"><span class="required" ng-show="!tableName">*</span>Table</label>
                             <div class="col-sm-10">
-                                <input type="text" id="tableName" value="" class="form-control" placeholder="table_name">
+                                <input type="text" id="tableName" ng-model="tableName" value="" class="form-control" placeholder="table_name" tabindex="2">
                             </div>
                         </div>
-                        <div class="form-group" ng-mouseover="options.activeOption=2" ng-mouseleave="options.activeOption=-1">
-                            <label for="encodedQuery" class="col-sm-2 control-label">Encoded Query</label>
+                        <div class="form-group" ng-mouseover="activeOption=2" ng-mouseleave="activeOption=-1">
+                            <label for="encodedQuery" class="col-sm-2 control-label"><span class="required" ng-show="!encodedQuery">*</span>Encoded Query</label>
                             <div class="col-sm-10">
-                                <input type="text" id="encodedQuery" value="" class="form-control" placeholder="caller_id=javascript:gs.getUserID()^active=true">
+                                <input type="text" id="encodedQuery" ng-model="encodedQuery" value="" class="form-control" placeholder="caller_id=javascript:gs.getUserID()^active=true" tabindex="3">
                                 <a title="Generate encoded strings from a filter" href="http://wiki.servicenow.com/index.php?title=Encoded_Query_Strings#Generating_Encoded_Query_Strings_through_a_Filter" target="_blank"><img src="img/round.png" /></a>
                             </div>
                         </div>
-                        <div class="form-group" ng-mouseover="options.activeOption=3" ng-mouseleave="options.activeOption=-1">
+                        <div class="form-group" ng-mouseover="activeOption=3" ng-mouseleave="activeOption=-1">
                             <label for="refreshRate" class="col-sm-2 control-label">Refresh Rate (seconds)</label>
                             <div class="col-sm-10">
-                                <input type="text" id="refreshRate" value="60" class="form-control" placeholder="caller_id=javascript:gs.getUserID()^active=true">
+                                <input type="text" id="refreshRate" value="60" class="form-control" placeholder="caller_id=javascript:gs.getUserID()^active=true" tabindex="4">
                             </div>
                         </div>
-                        <div class="form-group" ng-mouseover="options.activeOption=4" ng-mouseleave="options.activeOption=-1">
+                        <div class="form-group" ng-mouseover="activeOption=4" ng-mouseleave="activeOption=-1">
                             <label class="col-sm-2 control-label">Avg Response</label>
                             <div class="col-sm-10">
                                 <p id="avgResponse" class="form-control-static" style="display:inline"></p>
                             </div>
                         </div>
-                        <div class="form-group"  ng-mouseover="options.activeOption=5" ng-mouseleave="options.activeOption=-1">
+                        <div class="form-group" ng-mouseover="activeOption=5" ng-mouseleave="activeOption=-1">
                             <label for="enableNotifications" class="col-sm-2 control-label">Notifications Enabled</label>
                             <div class="col-sm-10">
-                                <input type="checkbox" id="enableNotifications" class="form-control">
+                                <input type="checkbox" id="enableNotifications" class="form-control" tabindex="5">
                             </div>
                         </div>
-                        <button id="save" type="submit" class="btn btn-primary">Save</button>
+                        <div class="form-group">
+                            <label for="save" class="col-sm-2 control-label">&nbsp;</label>
+                            <div class="col-sm-10">
+                                <button id="save" type="submit" class="btn btn-primary" tabindex="6">Save</button>
+                            </div>
+                        </div>
                         <fieldset>
                             <div id="status"></div>
                             <div class="pure-control-group">
@@ -66,27 +83,29 @@
                     </form>
                 </div>
                 <div class="col-md-3">
-                    <div class="panel panel-default" ng-show="options.activeOption>-1">
+                    <div class="panel panel-default" ng-show="activeOption>-1">
                         <div class="panel-heading">
-                            <h3 class="panel-title">{{options.opts[options.activeOption].title}}</h3>
+                            <h3 class="panel-title">{{opts[activeOption].title}}</h3>
                         </div>
                         <div class="panel-body">
-                            {{options.opts[options.activeOption].content}}
+                            {{opts[activeOption].content}}
                         </div>
                     </div>
                 </div>
             </div>
+            <div class="row">
+                <div id="imageList">
+                    <img src="img/list.png" />
+                    <span class="wysiwyg-font-size-large"> Icon made by <a title="Freepik" href="http://www.freepik.com" target="_blank">Freepik</a> from <a title="Flaticon" href="http://www.flaticon.com" target="_blank">www.flaticon.com</a>&nbsp;</span>
+                    <br/>
+                    <img src="img/round.png" />
+                    <span class="wysiwyg-font-size-large">Icon made by <a title="Google" href="http://www.google.com" target="_blank">Goggle</a> from <a title="Flaticon" href="http://www.flaticon.com" target="_blank">www.flaticon.com</a>&nbsp;</span>
+                </div>
+            </div>
         </div>
     </div>
-    <img src="img/list.png" />
-    <span class="wysiwyg-font-size-large"> Icon made by <a title="Freepik" href="http://www.freepik.com" target="_blank">Freepik</a> from <a title="Flaticon" href="http://www.flaticon.com" target="_blank">www.flaticon.com</a>&nbsp;</span>
-    <br/>
-    <img src="img/round.png" />
-    <span class="wysiwyg-font-size-large">Icon made by <a title="Google" href="http://www.google.com" target="_blank">Goggle</a> from <a title="Flaticon" href="http://www.flaticon.com" target="_blank">www.flaticon.com</a>&nbsp;</span>
-    <script src="libraries/jquery-1.12.3.min.js"></script>
     <script src="libraries/underscore.js"></script>
-    <script src="libraries/angular.min.js"></script>
-    <script src="app.js"></script>
     <script src="options.js"></script>
 </body>
+
 </html>
