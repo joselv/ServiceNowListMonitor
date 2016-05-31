@@ -1,10 +1,12 @@
 (function() {
     var app = angular.module('options', []);
 
-    app.controller('OptionsController', function OptionsController($scope, $http) {
-        $scope.instanceName = "instance-name";
-        $scope.tableName = "incident";
-        $scope.encodedQuery = "caller_id=javascript:gs.getUserID()^active=true";
+    app.controller('OptionsController', function OptionsController($scope, $http, SNLMStorage) {
+        SNLMStorage.findAll(function(items) {
+            $scope.instanceName = items.instance;
+            $scope.tableName = items.tableName;
+            $scope.encodedQuery = items.query;
+        });
         $scope.activeOption = -1;
         $scope.opts = [{
             title: "Instance",
@@ -27,5 +29,20 @@
             content: "When checked, OS notifications will appear."
         }];
 
+    });
+
+    app.service('SNLMStorage', function($q) {
+        this.findAll = function(callback) {
+            chrome.storage.sync.get({
+                query: 'caller_id=javascript:gs.getUserID()^active=true',
+                rate: 60,
+                nofications: true,
+                avgTime: [],
+                instance: 'instance-name',
+                tableName: 'incident'
+            }, function(keys) {
+                callback(keys);
+            });
+        };
     });
 })();
